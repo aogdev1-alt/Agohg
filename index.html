@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gold Price Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .gold-shimmer { background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700); }
+        .profit { color: #10b981; }
+        .loss { color: #ef4444; }
+        .pulse-gold { animation: pulse-gold 2s infinite; }
+        @keyframes pulse-gold {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-6 shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-coins text-3xl text-yellow-300"></i>
+                    <h1 class="text-2xl md:text-3xl font-bold">Gold Price Tracker</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm opacity-90">Live Price (24K Gold)</p>
+                        <div class="flex items-center space-x-2">
+                            <span id="currentPrice" class="text-2xl md:text-3xl font-bold text-yellow-300">Loading...</span>
+                            <span class="text-lg">€/g</span>
+                        </div>
+                        <p id="lastUpdated" class="text-xs opacity-75">Last updated: --</p>
+                    </div>
+                    <button id="refreshBtn" class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-200 pulse-gold">
+                        <i class="fas fa-sync-alt text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Status Indicator -->
+        <div class="mb-6 text-center">
+            <div id="statusIndicator" class="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-blue-100 text-blue-800">
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                <span class="text-sm font-medium">Connecting to live data...</span>
+            </div>
+        </div>
+
+        <!-- Investment Summary -->
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+            <!-- Investment Details -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                <div class="flex items-center space-x-3 mb-4">
+                    <i class="fas fa-wallet text-2xl text-blue-500"></i>
+                    <h2 class="text-xl font-semibold text-gray-800">Investment Details</h2>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Gold Holdings:</span>
+                        <span class="font-semibold">400 grams</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Purchase Price:</span>
+                        <span class="font-semibold">€65.00/g</span>
+                    </div>
+                    <div class="flex justify-between items-center border-t pt-3">
+                        <span class="text-gray-600">Total Investment:</span>
+                        <span class="font-bold text-lg">€26,000.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Value -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                <div class="flex items-center space-x-3 mb-4">
+                    <i class="fas fa-chart-line text-2xl text-green-500"></i>
+                    <h2 class="text-xl font-semibold text-gray-800">Current Value</h2>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Current Price:</span>
+                        <span id="currentPriceDisplay" class="font-semibold">€--/g</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Total Value:</span>
+                        <span id="totalValue" class="font-bold text-lg">€--</span>
+                    </div>
+                    <div class="flex justify-between items-center border-t pt-3">
+                        <span class="text-gray-600">Profit/Loss:</span>
+                        <div class="text-right">
+                            <div id="profitLoss" class="font-bold text-lg">€--</div>
+                            <div id="profitLossPercent" class="text-sm">(--%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Price Chart Placeholder -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex items-center space-x-3 mb-4">
+                <i class="fas fa-chart-area text-2xl text-purple-500"></i>
+                <h2 class="text-xl font-semibold text-gray-800">Price Trend</h2>
+            </div>
+            <div class="h-32 bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg flex items-center justify-center">
+                <div class="text-center text-gray-500">
+                    <i class="fas fa-chart-line text-3xl mb-2"></i>
+                    <p>Live price tracking active</p>
+                    <p class="text-sm">Updates every 30 seconds</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Information -->
+        <div class="bg-green-50 border border-green-200 rounded-xl p-6">
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-check-circle text-green-600 text-xl mt-1"></i>
+                <div>
+                    <h3 class="font-semibold text-green-800 mb-2">Live Data Active</h3>
+                    <p class="text-green-700 text-sm mb-2">
+                        Connected to GoldAPI.io for real-time 24K gold prices in EUR per gram.
+                    </p>
+                    <ul class="text-green-700 text-sm space-y-1 ml-4">
+                        <li>• Updates automatically every 30 seconds</li>
+                        <li>• Manual refresh available with the sync button</li>
+                        <li>• Prices converted from troy ounce to grams</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Investment constants
+        const GOLD_HOLDINGS = 400; // grams
+        const PURCHASE_PRICE = 65; // euros per gram
+        const TOTAL_INVESTMENT = GOLD_HOLDINGS * PURCHASE_PRICE;
+
+        // API configuration
+        const API_KEY = 'goldapi-5t7b65smflnknij-io';
+        const API_URL = 'https://www.goldapi.io/api/XAU/EUR';
+
+        let currentGoldPrice = 0;
+        let updateInterval;
+
+        // DOM elements
+        const currentPriceEl = document.getElementById('currentPrice');
+        const currentPriceDisplayEl = document.getElementById('currentPriceDisplay');
+        const totalValueEl = document.getElementById('totalValue');
+        const profitLossEl = document.getElementById('profitLoss');
+        const profitLossPercentEl = document.getElementById('profitLossPercent');
+        const lastUpdatedEl = document.getElementById('lastUpdated');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const statusIndicator = document.getElementById('statusIndicator');
+
+        // Fetch gold price from API
+        async function fetchGoldPrice() {
+            try {
+                updateStatus('Fetching live data...', 'blue');
+                
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'x-access-token': API_KEY,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // GoldAPI returns price per troy ounce, convert to grams
+                // 1 troy ounce = 31.1035 grams
+                const pricePerOunce = data.price;
+                const pricePerGram = pricePerOunce / 31.1035;
+
+                updatePriceDisplay(pricePerGram);
+                updateStatus('Live data connected', 'green');
+                
+            } catch (error) {
+                console.error('Error fetching gold price:', error);
+                updateStatus('Connection error - using demo data', 'yellow');
+                
+                // Fallback to demo data
+                const basePrice = 65;
+                const variation = (Math.random() - 0.5) * 10;
+                updatePriceDisplay(basePrice + variation);
+            }
+        }
+
+        // Update price display and calculations
+        function updatePriceDisplay(price) {
+            currentGoldPrice = price;
+            
+            // Update price displays
+            currentPriceEl.textContent = `€${price.toFixed(2)}`;
+            currentPriceDisplayEl.textContent = `€${price.toFixed(2)}/g`;
+            
+            // Calculate current value
+            const totalValue = GOLD_HOLDINGS * price;
+            totalValueEl.textContent = `€${totalValue.toLocaleString('en-EU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            
+            // Calculate profit/loss
+            const profitLoss = totalValue - TOTAL_INVESTMENT;
+            const profitLossPercent = (profitLoss / TOTAL_INVESTMENT) * 100;
+            
+            // Update profit/loss display
+            profitLossEl.textContent = `€${profitLoss.toLocaleString('en-EU', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            profitLossPercentEl.textContent = `(${profitLossPercent >= 0 ? '+' : ''}${profitLossPercent.toFixed(2)}%)`;
+            
+            // Apply profit/loss styling
+            const isProfit = profitLoss >= 0;
+            profitLossEl.className = `font-bold text-lg ${isProfit ? 'profit' : 'loss'}`;
+            profitLossPercentEl.className = `text-sm ${isProfit ? 'profit' : 'loss'}`;
+            
+            // Update timestamp
+            lastUpdatedEl.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+        }
+
+        // Update status indicator
+        function updateStatus(message, color) {
+            const colors = {
+                blue: 'bg-blue-100 text-blue-800',
+                green: 'bg-green-100 text-green-800',
+                yellow: 'bg-yellow-100 text-yellow-800',
+                red: 'bg-red-100 text-red-800'
+            };
+            
+            statusIndicator.className = `inline-flex items-center space-x-2 px-4 py-2 rounded-full ${colors[color]}`;
+            statusIndicator.querySelector('span').textContent = message;
+            
+            const dot = statusIndicator.querySelector('div');
+            dot.className = `w-2 h-2 rounded-full ${color === 'green' ? 'bg-green-500' : color === 'yellow' ? 'bg-yellow-500' : color === 'red' ? 'bg-red-500' : 'bg-blue-500 animate-pulse'}`;
+        }
+
+        // Refresh button animation
+        function animateRefreshButton() {
+            refreshBtn.style.transform = 'rotate(360deg)';
+            refreshBtn.style.transition = 'transform 0.5s ease-in-out';
+            setTimeout(() => {
+                refreshBtn.style.transform = 'rotate(0deg)';
+            }, 500);
+        }
+
+        // Event listeners
+        refreshBtn.addEventListener('click', () => {
+            animateRefreshButton();
+            fetchGoldPrice();
+        });
+
+        // Start automatic updates
+        function startAutoUpdate() {
+            fetchGoldPrice(); // Initial fetch
+            updateInterval = setInterval(fetchGoldPrice, 30000); // Update every 30 seconds
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            startAutoUpdate();
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97fde000d3b28d67',t:'MTc1Nzk5OTYxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
